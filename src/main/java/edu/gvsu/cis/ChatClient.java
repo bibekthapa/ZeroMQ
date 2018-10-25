@@ -38,29 +38,29 @@ public class ChatClient
         // Step 0. Figure out local host name.
         String myHost;
         try {
-            myHost = "tcp://"+InetAddress.getLocalHost().getHostName();
+            myHost = InetAddress.getLocalHost().getHostName();
             System.out.println(myHost);
             
         } catch (UnknownHostException e) {
             myHost = "localhost";
         }
 
-        // Step 1. We need to establish a server socket where we will listen for
-        // incoming chat requests.
-        try {
-//            this.serviceSkt = new ServerSocket(0);
-        	
+//        // Step 1. We need to establish a server socket where we will listen for
+//        // incoming chat requests.
+//        try {
+////            this.serviceSkt = new ServerSocket(0);
+//        	
         	zmqsocket = context.socket(ZMQ.REP);
-        	
-        	
-        	 
-        	
-        } catch (Exception e) {
-            System.out.println("Error: Couldn't allocate local socket endpoint.");
-            System.exit(-1);
-        }
+//        	
+//        	
+//        	 
+//        	
+//        } catch (Exception e) {
+//            System.out.println("Error: Couldn't allocate local socket endpoint.");
+//            System.exit(-1);
+//        }
 
-
+        this.zmqsocket = context.socket(ZMQ.REP);
         // Step 2. we bind to the nameserver so we can register our client.
         if(hostPortStr == null) {
             hostPortStr = myHost;
@@ -239,9 +239,9 @@ public class ChatClient
         boolean retval = true;
         try {
             // look up this user's registration info so we can send message.
-        	System.out.println("Before Reg. info");
+        	
             RegistrationInfo reg = this.nameServer.lookup(userName);
-            System.out.println("After Reg.info");
+            
             retval = this.sendMsgToKnownUser(reg, msg);
         } catch (RemoteException re) {
             System.out.println("Could not connect to presence server!");
@@ -271,19 +271,17 @@ public class ChatClient
 //                skt.close();
             	ZMQ.Context context = ZMQ.context(1);
             	ZMQ.Socket socket = context.socket(ZMQ.REQ);
-            	System.out.println("Before Socket Connect");
-            	System.out.println(reg.getHost()+reg.getPort());
+            	
+            	
             	socket.connect("tcp://"+reg.getHost()+":"+reg.getPort());
             	
-            	System.out.println("After Socket Connect");
+            
             	String completeMsg = "Message from " + this.regInfo.getUserName() + ": " + msg + "\n";
-//            	System.out.println(completeMsg);
-            	System.out.println("Before the send msg");
-            	
-            	  socket.send(completeMsg.getBytes(),0);
+           
+            	 socket.send(completeMsg.getBytes(),0);
               
             	
-            	System.out.println("After the send msg");
+            	
               socket.close();
               context.term();
             	
@@ -326,14 +324,9 @@ public class ChatClient
             while(!done) {
             	
             	
-//               ZMQ.Socket clientSocket = null;
-//               clientSocket = context.socket(ZMQ.REP);
-                
-            	zmqsocket.connect("tcp://*");
+            	
+            	
 
-                //
-                // Might have shutdown while  waiting for request...
-                //
                 if(done) {
                     break;
                 }
@@ -343,13 +336,14 @@ public class ChatClient
                 //
                
                 byte[] reply = zmqsocket.recv(0);
-				System.out.println("After msg recieve");
+				
 
 				// We'll refresh the prompt, lest the chimp on the console
 				// get's confused.
-				System.out.println(reply);
+				System.out.println( new String(reply, ZMQ.CHARSET)
+                );
 				
-				System.out.println("After reply");
+				
 				ChatClient.this.promptUser();
 				
 
